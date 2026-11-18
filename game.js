@@ -6,6 +6,7 @@ let W=0,H=0,dpr=1,running=false,paused=false,last=0,elapsed=0,toastTimer=0,fireT
 const game={x:0,z:0,y:0,yaw:0,health:100,stamina:100,kills:0,herbs:1,weapon:0,ammo:[12,4],reserve:[48,16],reloading:false,reloadTimer:0,jump:0,jumpV:0,invuln:0,walk:0,flash:0};
 const weapons=[{name:'PISTOLA 9MM',capacity:12,damage:38,rate:.32,reload:1.15,range:20},{name:'ESCOPETA',capacity:4,damage:74,rate:.72,reload:1.65,range:12}];
 let zombies=[],pickups=[],polygons=[],staticPolys=[],scenery=[],keys=new Set(),cursor={x:0,y:0},camera={x:0,y:0,z:0,fx:0,fy:0,fz:-1,rx:1,ry:0,rz:0,ux:0,uy:1,uz:0},shake=0,gameEnd=false,mouseDown=false;
+let mobileMove={x:0,y:0},mobileRun=false,lookDrag=null;
 const rnd=(a,b)=>a+Math.random()*(b-a),clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),dist=(a,b,c,d)=>Math.hypot(a-c,b-d);
 function resize(){dpr=Math.min(devicePixelRatio||1,1.35);W=innerWidth;H=innerHeight;canvas.width=Math.round(W*dpr*.72);canvas.height=Math.round(H*dpr*.72);ctx.setTransform(1,0,0,1,0,0);ctx.imageSmoothingEnabled=false}
 addEventListener('resize',resize);resize();
@@ -49,7 +50,7 @@ function endGame(won){if(gameEnd)return;gameEnd=true;running=false;ui.hud.classL
 
 function update(dt){if(!running||paused||gameEnd)return;elapsed+=dt;fireTimer=Math.max(0,fireTimer-dt);hurtTimer=Math.max(0,hurtTimer-dt);toastTimer=Math.max(0,toastTimer-dt);game.flash=Math.max(0,game.flash-dt*2.8);game.invuln=Math.max(0,game.invuln-dt);shake=Math.max(0,shake-dt*.5);if(toastTimer<=0)ui.toast.classList.remove('show');
 if(game.reloading){game.reloadTimer-=dt;if(game.reloadTimer<=0){const w=weapons[game.weapon],need=w.capacity-game.ammo[game.weapon],take=Math.min(need,game.reserve[game.weapon]);game.ammo[game.weapon]+=take;game.reserve[game.weapon]-=take;game.reloading=false;playTone(180,.08,'triangle');showToast('ARMA CARREGADA')}}
-const forward=(keys.has('w')?1:0)-(keys.has('s')?1:0),strafe=(keys.has('d')?1:0)-(keys.has('a')?1:0),runningNow=(keys.has('shift')||mobileRun)&&game.stamina>1&&forward!==0,speed=(runningNow?3.25:1.75)*dt;if(forward||strafe){const sy=Math.sin(game.yaw),cy=Math.cos(game.yaw),dx=(strafe*cy+forward*sy)*speed,dz=(strafe*-sy+forward*cy)*speed,nx=clamp(game.x+dx,-2.95,2.95),nz=clamp(game.z+dz,-88,13);game.x=nx;game.z=nz;game.walk+=dt*(runningNow?10:6);if(runningNow)game.stamina=Math.max(0,game.stamina-dt*18);else game.stamina=Math.min(100,game.stamina+dt*9)}else game.stamina=Math.min(100,game.stamina+dt*5);
+const forward=(keys.has('w')?1:0)-(keys.has('s')?1:0)+(-mobileMove.y),strafe=(keys.has('d')?1:0)-(keys.has('a')?1:0)+mobileMove.x,forwardClamped=clamp(forward,-1,1),strafeClamped=clamp(strafe,-1,1),runningNow=(keys.has('shift')||mobileRun)&&game.stamina>1&&Math.abs(forwardClamped)>0,speed=(runningNow?3.25:1.75)*dt;if(forwardClamped||strafeClamped){const sy=Math.sin(game.yaw),cy=Math.cos(game.yaw),dx=(strafeClamped*cy+forwardClamped*sy)*speed,dz=(strafeClamped*-sy+forwardClamped*cy)*speed,nx=clamp(game.x+dx,-2.95,2.95),nz=clamp(game.z+dz,-88,13);game.x=nx;game.z=nz;game.walk+=dt*(runningNow?10:6);if(runningNow)game.stamina=Math.max(0,game.stamina-dt*18);else game.stamina=Math.min(100,game.stamina+dt*9)}else game.stamina=Math.min(100,game.stamina+dt*5);
 if(game.jump>0||game.jumpV>0){game.jump+=game.jumpV*dt;game.jumpV-=7*dt;if(game.jump<=0){game.jump=0;game.jumpV=0}}
 spawnTimer-=dt;if(spawnTimer<=0&&zombies.filter(z=>z.hp>0).length<8){spawnZombie(rnd(-75,-18),rnd(-3,3));spawnTimer=rnd(7,11)}
 for(const z of zombies){if(z.hp<=0){z.dead+=dt;if(z.dead>.7)continue;continue}z.walk+=dt*z.speed*5;const dx=game.x-z.x,dz=game.z-z.z,d=Math.hypot(dx,dz);z.yaw=Math.atan2(dx,-dz);if(d>1.05){z.x+=dx/d*z.speed*dt;z.z+=dz/d*z.speed*dt}else if(game.invuln<=0){game.health-=rnd(5,9);game.invuln=.9;hurtTimer=.32;ui.damage.classList.add('active');setTimeout(()=>ui.damage.classList.remove('active'),180);playTone(70,.12,'sawtooth',.04);if(game.health<=0){game.health=0;endGame(false)}}z.attack+=dt}
@@ -68,8 +69,14 @@ setInterval(()=>{if(mouseDown)fire()},70);
 
 $('#start-button').addEventListener('click',begin);$('#restart-button').addEventListener('click',begin);$('#close-inventory').addEventListener('click',toggleInventory);
 for(const b of document.querySelectorAll('[data-item="pistol"]'))b.addEventListener('click',()=>swapWeapon(0));for(const b of document.querySelectorAll('[data-item="shotgun"]'))b.addEventListener('click',()=>swapWeapon(1));
-let mobileRun=false;
-for(const b of document.querySelectorAll('[data-key]')){const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys.add(k);if(k==='shift')mobileRun=true});b.addEventListener('pointerup',e=>{e.preventDefault();keys.delete(k);if(k==='shift')mobileRun=false});b.addEventListener('pointercancel',()=>keys.delete(k))}
+const moveStick=$('#move-stick'),moveKnob=$('#move-knob'),lookPad=$('#look-pad');
+moveStick.addEventListener('pointerdown',e=>{e.preventDefault();moveStick.setPointerCapture(e.pointerId);updateStick(e)});
+moveStick.addEventListener('pointermove',e=>{if(moveStick.hasPointerCapture(e.pointerId))updateStick(e)});
+function updateStick(e){const r=moveStick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,max=r.width*.34,d=Math.hypot(dx,dy)||1,s=Math.min(d,max);const x=dx/d*s,y=dy/d*s;moveKnob.style.transform=`translate(${x}px,${y}px)`;mobileMove={x:x/max,y:y/max}}
+for(const ev of ['pointerup','pointercancel','lostpointercapture'])moveStick.addEventListener(ev,()=>{moveKnob.style.transform='translate(0,0)';mobileMove={x:0,y:0}});
+lookPad.addEventListener('pointerdown',e=>{e.preventDefault();lookPad.setPointerCapture(e.pointerId);lookDrag={id:e.pointerId,x:e.clientX,y:e.clientY}});
+lookPad.addEventListener('pointermove',e=>{if(!lookDrag||lookDrag.id!==e.pointerId)return;const dx=e.clientX-lookDrag.x;lookDrag.x=e.clientX;lookDrag.y=e.clientY;game.yaw-=dx*.006;cursor.x=clamp(cursor.x+dx,-100,W+100)});
+for(const ev of ['pointerup','pointercancel','lostpointercapture'])lookPad.addEventListener(ev,()=>lookDrag=null);
 document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();const a=b.dataset.action;if(a==='jump'&&!game.jump&&!game.jumpV)game.jumpV=4.6;if(a==='reload')reload();if(a==='interact')interact()}));
 $('#mobile-shoot').addEventListener('pointerdown',e=>{e.preventDefault();mouseDown=true;fire()});$('#mobile-shoot').addEventListener('pointerup',()=>mouseDown=false);
 

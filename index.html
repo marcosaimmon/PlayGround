@@ -29,7 +29,18 @@
       <div class="damage-flash" id="damage-flash"></div>
     </section>
     <section id="end-screen" class="screen hidden"><div class="end-card"><span class="eyebrow" id="end-eyebrow">SINAL DE RESGATE</span><h2 id="end-title">A MARÉ VAI<br><em>BAIXAR.</em></h2><p id="end-copy">O farol voltou a brilhar. Por enquanto, Fortaleza ainda resiste.</p><div class="end-stats"><span>AMEAÇAS ELIMINADAS<b id="end-kills">0</b></span><span>TEMPO DE SOBREVIVÊNCIA<b id="end-time">00:00</b></span></div><button id="restart-button" class="primary-button">JOGAR NOVAMENTE <span>↻</span></button></div></section>
-    <div class="mobile-controls" id="mobile-controls"><div class="dpad"><button data-key="w">▲</button><div><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button></div></div><div class="mobile-actions"><button id="mobile-shoot">ATIRAR</button><button data-action="jump">PULAR</button><button data-action="reload">RECARREGAR</button><button data-action="interact">USAR</button></div></div>
+    <div class="mobile-controls" id="mobile-controls">
+      <div class="joystick" id="move-stick" aria-label="Controlar movimento">
+        <span class="joystick-ring"></span><button id="move-knob" aria-label="Joystick de movimento"></button>
+      </div>
+      <div class="look-pad" id="look-pad" aria-label="Arraste para mover a câmera"><span>↔</span><small>MOVER TELA</small></div>
+      <div class="mobile-actions">
+        <button id="mobile-shoot">ATIRAR</button>
+        <button data-action="jump">PULAR</button>
+        <button data-action="reload">REC.</button>
+        <button data-action="interact">USAR</button>
+      </div>
+    </div>
     <footer class="bottomline"><span>WASD <small>MOVER</small></span><span>SHIFT <small>CORRER</small></span><span>ESPAÇO <small>PULAR</small></span><span>R <small>RECARREGAR</small></span><span>E <small>INTERAGIR</small></span><span>Q <small>INVENTÁRIO</small></span><span class="footer-right">FORTALEZA NÃO DORME.</span></footer>
   </main>
   <script src="game.js"></script>

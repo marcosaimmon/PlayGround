@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#101513" />
+  <title>MARÉ MORTA — Fortaleza, CE</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="game-shell">
+    <canvas id="game" aria-label="Jogo Maré Morta"></canvas>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <header class="topline"><span class="brand-mark">MM</span><span>MARÉ MORTA</span><i></i><span class="location">FORTALEZA · CEARÁ</span><span class="chapter">CAPÍTULO 01 — A ÚLTIMA MARÉ</span></header>
+    <section id="title-screen" class="screen visible">
+      <div class="title-copy"><p class="eyebrow">UMA NOITE SEM FIM NO NORDESTE</p><h1>MARÉ<br><em>MORTA</em></h1><p class="intro">Quando a maré baixou, alguma coisa voltou com ela.</p><button id="start-button" class="primary-button">INICIAR MISSÃO <span>▶</span></button><p class="title-foot">FORTALEZA, CEARÁ · 03:17 DA MANHÃ</p></div>
+      <div class="title-aside"><span>01 / 04</span><div></div><small>AVISO DE EMERGÊNCIA<br>ABRIGO NO FAROL<br>ESTOQUE CRÍTICO</small></div>
+      <div class="title-hint">WASD mover <b>·</b> mouse mirar e atirar <b>·</b> Q inventário</div>
+    </section>
+    <section id="hud" class="hidden" aria-live="polite">
+      <div class="mission-card"><span class="micro-label">OBJETIVO ATUAL</span><strong id="objective">ENCONTRE O FAROL</strong><small id="objective-sub">Elimine as ameaças no caminho</small><div class="objective-progress"><span id="progress-fill"></span></div><small id="progress-text">AMEAÇAS 0 / 8</small></div>
+      <div class="survivor-card"><div class="survivor-top"><div class="portrait">L</div><div><span class="micro-label">LIA · SOBREVIVENTE</span><b>VIVA</b></div><span class="status-dot"></span></div><div class="health-row"><span>VIDA</span><div class="health-track"><i id="health-fill"></i></div><b id="health-value">100</b></div><div class="stamina-row"><span>FÔLEGO</span><div class="stamina-track"><i id="stamina-fill"></i></div></div></div>
+      <div class="weapon-card"><div class="weapon-name"><span class="micro-label">ARMA EQUIPADA</span><b id="weapon-name">PISTOLA 9MM</b><span id="weapon-slot">01 / 02</span></div><div class="ammo"><strong id="ammo-mag">12</strong><span>/</span><b id="ammo-reserve">48</b><small>MUNIÇÃO</small></div><div class="weapon-switch"><span>1</span> PISTOLA <i></i><span>2</span> ESCOPETA</div></div>
+      <div class="interact-hint hidden" id="interact-hint">[ E ] PEGAR ITEM</div>
+      <div class="crosshair" id="crosshair"><i></i><b></b></div>
+      <div class="toast" id="toast"></div>
+      <div id="inventory" class="inventory hidden"><div class="inventory-panel"><div class="inventory-heading"><div><span class="micro-label">EQUIPAMENTO DE CAMPO</span><h2>INVENTÁRIO</h2></div><button id="close-inventory" aria-label="Fechar inventário">×</button></div><div class="inventory-grid"><button class="item selected" data-item="pistol"><span class="item-icon">◈</span><strong>PISTOLA 9MM</strong><small>Arma · slot 01</small><b id="inv-pistol">12 / 48</b></button><button class="item" data-item="shotgun"><span class="item-icon">▰</span><strong>ESCOPETA</strong><small>Arma · slot 02</small><b id="inv-shotgun">4 / 16</b></button><div class="item"><span class="item-icon">✚</span><strong>ERVAS MEDICINAIS</strong><small>Recupera 35 de vida</small><b id="inv-herbs">1 unidade</b></div><div class="item"><span class="item-icon">▤</span><strong>ANOTAÇÃO MOLHADA</strong><small>“O farol ainda está aceso.”</small><b>DOCUMENTO</b></div></div><p class="inventory-note">Use <kbd>1</kbd> / <kbd>2</kbd> para trocar de arma · <kbd>Q</kbd> para voltar</p></div></div>
+      <div class="damage-flash" id="damage-flash"></div>
+    </section>
+    <section id="end-screen" class="screen hidden"><div class="end-card"><span class="eyebrow" id="end-eyebrow">SINAL DE RESGATE</span><h2 id="end-title">A MARÉ VAI<br><em>BAIXAR.</em></h2><p id="end-copy">O farol voltou a brilhar. Por enquanto, Fortaleza ainda resiste.</p><div class="end-stats"><span>AMEAÇAS ELIMINADAS<b id="end-kills">0</b></span><span>TEMPO DE SOBREVIVÊNCIA<b id="end-time">00:00</b></span></div><button id="restart-button" class="primary-button">JOGAR NOVAMENTE <span>↻</span></button></div></section>
+    <div class="mobile-controls" id="mobile-controls"><div class="dpad"><button data-key="w">▲</button><div><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button></div></div><div class="mobile-actions"><button id="mobile-shoot">ATIRAR</button><button data-action="jump">PULAR</button><button data-action="reload">RECARREGAR</button><button data-action="interact">USAR</button></div></div>
+    <footer class="bottomline"><span>WASD <small>MOVER</small></span><span>SHIFT <small>CORRER</small></span><span>ESPAÇO <small>PULAR</small></span><span>R <small>RECARREGAR</small></span><span>E <small>INTERAGIR</small></span><span>Q <small>INVENTÁRIO</small></span><span class="footer-right">FORTALEZA NÃO DORME.</span></footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
